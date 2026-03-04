@@ -23,14 +23,20 @@ tasks.named('test') {
 }
 
 //일반 Jar 생성
+//META-INF/MANIFEST.MF 파일에 실행할 main() 메서드의 클래스를 지정
+//build 시 MANIFEST.MF 파일을 만들어줌
 task buildJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'hello.embed.EmbedTomcatSpringMain'
     }
     with jar
 }
+// 위와 같이 jar로 묶으면 라이브러리는 안 묶인다 jar안에 Jar가 있을 수 없음
+// 그래서 Lib폴더를 따로 만들고 그 경로를 실행할 때 연결 시켜줘야함 classPath
+
 
 //Fat Jar 생성
+//위 문제를 해결하기 위해 라이브러리의 Jar파일들을 압축을 다 풀어서 class형태로 바꾼다.
 task buildFatJar(type: Jar) {
     manifest {
         attributes 'Main-Class': 'hello.embed.EmbedTomcatSpringMain'
@@ -39,3 +45,8 @@ task buildFatJar(type: Jar) {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }
+
+// Fat jar의 문제점
+//어떤 라이브러리가 포함되어 있는지 확인하기 어렵다.
+//Encountered duplicate path ~~
+// 파일명 중복을 해결할 수 없다.
