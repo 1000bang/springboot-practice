@@ -1,0 +1,8 @@
+# IDE
+.idea/
+
+# Claude Code
+CLAUDE.md
+
+# Embedded Tomcat working directory
+tomcat.*/

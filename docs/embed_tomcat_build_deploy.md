@@ -312,7 +312,75 @@ my-app.jar
 | **파일명 중복** | 하나가 무시됨 | 각 Jar가 독립적이므로 문제 없음 |
 | **실행 방법** | `java -jar` | `java -jar` (JarLauncher가 중첩 Jar 로딩) |
 
-> 자바 표준으로는 Jar 안의 Jar를 읽을 수 없다. 스프링 부트는 `JarLauncher`라는 커스텀 클래스로더를 통해 이 제한을 자체적으로 우회했다.
+> 자바 표준으로는 Jar 안의 Jar를 읽을 수 없다. 스프링 부트는 Jar 내부에 Jar를 포함할 수 있는 특별한 구조의 Jar를 만들고, 동시에 내부 Jar를 포함해서 실행할 수 있게 했다. 이것을 **실행 가능 Jar(Executable Jar)** 라 한다. 이 방식은 자바 표준이 아니고, 스프링 부트에서 새롭게 정의한 것이다.
+
+### 실행 가능 Jar 내부 구조
+
+`./gradlew clean build` 수행 후 생성된 Jar 파일의 압축을 풀어보면 다음과 같은 구조를 확인할 수 있다.
+
+```
+boot-0.0.1-SNAPSHOT.jar
+  │
+  ├─ META-INF/
+  │    └─ MANIFEST.MF                         ← 실행 정보 정의
+  │
+  ├─ BOOT-INF/
+  │    ├─ classes/                             ← 개발자가 작성한 코드
+  │    │    └─ hello/boot/BootApplication.class
+  │    ├─ lib/                                 ← 외부 라이브러리 (Jar 그대로 보관)
+  │    │    ├─ spring-boot-3.0.2.jar
+  │    │    ├─ spring-webmvc-6.0.4.jar
+  │    │    ├─ tomcat-embed-core-10.1.5.jar
+  │    │    └─ ...
+  │    ├─ classpath.idx                        ← 클래스패스 순서 정보
+  │    └─ layers.idx                           ← 도커 레이어 최적화 정보
+  │
+  └─ org/springframework/boot/loader/         ← 스프링 부트 로더
+       ├─ JarLauncher.class                   ← 실제 main() 실행 진입점
+       └─ ...
+```
+
+### MANIFEST.MF
+
+`java -jar`로 실행하면 JVM은 `META-INF/MANIFEST.MF`의 `Main-Class`를 읽어 실행한다.
+
+```
+Manifest-Version: 1.0
+Main-Class: org.springframework.boot.loader.JarLauncher
+Start-Class: hello.boot.BootApplication
+Spring-Boot-Version: 3.0.2
+Spring-Boot-Classes: BOOT-INF/classes/
+Spring-Boot-Lib: BOOT-INF/lib/
+Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx
+Spring-Boot-Layers-Index: BOOT-INF/layers.idx
+Build-Jdk-Spec: 17
+```
+
+| 항목 | 역할 |
+|------|------|
+| `Main-Class` | `JarLauncher` — JVM이 가장 먼저 실행하는 클래스. `BOOT-INF/lib/`의 Jar들을 클래스패스에 등록하는 커스텀 클래스로더를 구성한다. |
+| `Start-Class` | `BootApplication` — 개발자가 작성한 실제 `main()` 클래스. `JarLauncher`가 클래스로더 설정을 완료한 뒤 이 클래스의 `main()`을 호출한다. |
+| `Spring-Boot-Classes` | 개발자 코드 경로 (`BOOT-INF/classes/`) |
+| `Spring-Boot-Lib` | 라이브러리 Jar 경로 (`BOOT-INF/lib/`) |
+
+### 실행 흐름
+
+```
+java -jar boot-0.0.1-SNAPSHOT.jar
+  │
+  ├─ 1. JVM이 MANIFEST.MF의 Main-Class를 읽음
+  │       → org.springframework.boot.loader.JarLauncher
+  │
+  ├─ 2. JarLauncher가 커스텀 클래스로더를 생성
+  │       → BOOT-INF/classes/ 와 BOOT-INF/lib/*.jar 를 클래스패스에 등록
+  │
+  ├─ 3. MANIFEST.MF의 Start-Class를 읽음
+  │       → hello.boot.BootApplication
+  │
+  └─ 4. BootApplication.main() 실행
+          → SpringApplication.run()
+          → 스프링 컨테이너 생성 + 내장 톰캣 시작
+```
 
 ---
 

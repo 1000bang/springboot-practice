@@ -14,3 +14,37 @@ public class BootApplication {
 	}
 
 }
+
+/*
+./gradlew clean build 수행 후
+jar파일을 압축을 풀어보니
+BOOT-INT 안에 classes와 lib 외부 라이브러리 폴더가 생성됨
+
+jar를 푼 결과를 보면 Fat jar가 아니라 새로운 구조로 만들어져 있다. jar 내부에 Jar를 담아서 인식하는 것이 불가능한데
+jar가 포함되어 있고 인식까지 되었다.
+
+-- 스프링 부트의 실행 가능 Jar
+스프링 부트는 이런 문제를 해결하기 위해 Jar 내부에 jar를 포함할 수 있는 특별한 구조의 jar를 만들고
+동시에 만든 Jar 내부 Jar를 포함해서 실행 할 수 있게 했다.
+이것을 실행 가능 Jar (Executable Jar) 라 한다.
+
+문제: 어떤 라이브러리가 포함되어 있는지 확인하기 어렵다.
+해결: jar 내부에 jar를 포함하기 때문에 어떤 라이브러리가 포함되어 있는지 쉽게 확인할 수 있다.
+
+문제: 파일명 중복을 해결할 수 없다.
+해결: jar 내부에 jar를 포함하기 때문에 a.jar , b.jar 내부에 같은 경로의 파일이 있어도 둘다 인식할 수 있다.
+
+실행 가능 Jar는 자바 표준은 아니고, 스프링 부트에서 새롭게 정의한 것이다.
+
+
+실행가능 Jar 내부구조
+
+
+--
+MANIFEST.MF
+```
+Manifest-Version: 1.0 Main-Class: org.springframework.boot.loader.JarLauncher Start-Class: hello.boot.BootApplication Spring-Boot-Version: 3.0.2 Spring-Boot-Classes: BOOT-INF/classes/ Spring-Boot-Lib: BOOT-INF/lib/ Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx Spring-Boot-Layers-Index: BOOT-INF/layers.idx Build-Jdk-Spec: 17
+```
+
+
+ */
