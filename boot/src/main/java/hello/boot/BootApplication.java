@@ -36,15 +36,4 @@ jar가 포함되어 있고 인식까지 되었다.
 
 실행 가능 Jar는 자바 표준은 아니고, 스프링 부트에서 새롭게 정의한 것이다.
 
-
-실행가능 Jar 내부구조
-
-
---
-MANIFEST.MF
-```
-Manifest-Version: 1.0 Main-Class: org.springframework.boot.loader.JarLauncher Start-Class: hello.boot.BootApplication Spring-Boot-Version: 3.0.2 Spring-Boot-Classes: BOOT-INF/classes/ Spring-Boot-Lib: BOOT-INF/lib/ Spring-Boot-Classpath-Index: BOOT-INF/classpath.idx Spring-Boot-Layers-Index: BOOT-INF/layers.idx Build-Jdk-Spec: 17
-```
-
-
  */
