@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(jar xf:*)",
-      "Bash(javap:*)",
-      "Bash(find:*)"
-    ]
-  }
-}
