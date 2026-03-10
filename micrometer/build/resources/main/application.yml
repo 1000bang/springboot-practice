@@ -1,0 +1,12 @@
+management:
+  server:
+    port: 9292
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true

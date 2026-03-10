@@ -48,7 +48,7 @@ http://localhost:8080/actuator/loggers
     "hello": {
       "effectiveLevel": "INFO"
     },
-    "hello.ActuatorApplication": {
+    "hello.MicroMeterApplication": {
       "effectiveLevel": "INFO"
     },
     "hello.controller": {
