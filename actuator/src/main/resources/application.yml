@@ -11,8 +11,8 @@ management:
     shutdown:
       enabled: true
     health:
-      show-components: always
-    #show-details: always #detail? ?? ????? show-components
+      #show-components: always
+     show-details: always #detail? ?? ????? show-components
   info:
     java:
       enabled: true
